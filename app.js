@@ -1,4 +1,4 @@
-const HolidayRequest = require('./storage/holidayRequest');
+const HolidayRequest = require('./holiday_management/holidayRequest');
 const express = require('express');
 const bodyParser = require('body-parser');
 const PORT = 3033;
