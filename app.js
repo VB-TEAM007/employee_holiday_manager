@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -7,6 +8,11 @@ const holidayRequest_1 = require("./models/holidayRequest");
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const holidayRequests_1 = __importDefault(require("./storage/holidayRequests"));
+=======
+const HolidayRequest = require('./holiday_management/holidayRequest');
+const express = require('express');
+const bodyParser = require('body-parser');
+>>>>>>> a518ee1a9443ca8ae6e44cfc4b669dbfff97dc74
 const PORT = 3033;
 const HOST = 'localhost';
 const app = (0, express_1.default)();
