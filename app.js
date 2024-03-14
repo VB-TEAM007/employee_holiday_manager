@@ -15,7 +15,6 @@ const HOST = 'localhost';
 const app = (0, express_1.default)();
 app.set('view engine', 'ejs');
 app.use(body_parser_1.default.urlencoded({ extended: true }));
-const requests = [];
 const Requests = new holidayRequests_1.default();
 const Employees = new emplioyeers_1.default();
 app.get('/', (req, res) => {
@@ -24,9 +23,9 @@ app.get('/', (req, res) => {
 app.get('/add-employee', (req, res) => {
     res.render('add-employee');
 });
+var employeeId = 0;
 app.post('/add-employee', (req, res) => {
-    const employees = Employees.getEmployees();
-    const newEmployee = new employee_1.Employee(employees.length, req.body.name, req.body.remainingHolidays);
+    const newEmployee = new employee_1.Employee(employeeId++, req.body.name, req.body.remainingHolidays);
     Employees.addEmployee(newEmployee);
     res.redirect('/employees');
 });
@@ -36,43 +35,41 @@ app.get('/employees', (req, res) => {
 });
 app.get('/requests', (req, res) => {
     const holidayRequests = Requests.getHolidayRequests();
-    console.log(requests);
     res.render('requests', { holidayRequests });
 });
 app.get('/add-request', (req, res) => {
     res.render('add-request');
 });
+var requestId = 0;
 app.post('/add-request', (req, res) => {
-    const holidayRequest = new holidayRequest_1.HolidayRequest(requests.length, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
-    //console.log(holidayRequest.id);
+    const requests = Requests.getHolidayRequests();
+    const holidayRequest = new holidayRequest_1.HolidayRequest(requestId++, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
     if ((0, validation_1.validateHolidayRequest)(holidayRequest, Employees)) {
         Requests.addHolidayRequest(holidayRequest);
-        console.log(holidayRequest.id);
         res.redirect('/requests');
     }
     else
         res.render('add-request');
 });
-app.post('/approve-request', (req, res) => {
-    const requestId = req.body.requestId;
-    const request = requests.find(req => req.employeeId === requestId);
-    ;
+app.post('/approve-request/:id', (req, res) => {
+    const request = Requests.getHolidayById(parseInt(req.params.id));
     if (request) {
         request.status = 'approved';
-        res.redirect('/requests');
     }
+    res.redirect('/requests');
 });
-app.post('/reject-request', (req, res) => {
-    const requestId = req.body.requestId;
-    const request = requests.find(req => req.employeeId === requestId);
-    ;
+app.post('/reject-request/:id', (req, res) => {
+    const request = Requests.getHolidayById(parseInt(req.params.id));
+    console.log(req.params.id);
     if (request) {
         request.status = 'rejected';
-        res.redirect('/requests');
     }
+    res.redirect('/requests');
 });
-app.post('/delete-request', (req, res) => {
-    const requestId = req.body.employeeId;
+app.post('/delete-request/:id', (req, res) => {
+    console.log(Requests.getHolidayRequests());
+    Requests.deleteHolidayRequests(req.body.id);
+    res.redirect('/requests');
 });
 app.get('*', (req, res) => {
     res.status(404).render('error');

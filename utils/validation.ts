@@ -1,17 +1,13 @@
 import { HolidayRequest } from "../models/holidayRequest";
 import Employeers from "../storage/emplioyeers";
+import HolidayRequests from "../storage/holidayRequests";
 
 export function validateHolidayRequest(request: HolidayRequest, Employees: Employeers): boolean {
-    const employees = Employees.getEmployees();
-    console.log(request);
     const employee = Employees.getEmployeeById(request.employeeId);
-    console.log(employee);
     if (employee){
         const today: Date = new Date();
         const startDate: Date = new Date(request.startDate);
-        const endDate: Date = new Date(request.endDate)
-        console.log(today);
-        console.log(startDate);
+        const endDate: Date = new Date(request.endDate);
         if (startDate > today){
             const totalDaysRequested = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
             if (totalDaysRequested > employee.remainingHolidays) {

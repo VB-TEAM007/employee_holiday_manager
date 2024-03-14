@@ -2,16 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateHolidayRequest = void 0;
 function validateHolidayRequest(request, Employees) {
-    const employees = Employees.getEmployees();
-    console.log(request);
     const employee = Employees.getEmployeeById(request.employeeId);
-    console.log(employee);
     if (employee) {
         const today = new Date();
         const startDate = new Date(request.startDate);
         const endDate = new Date(request.endDate);
-        console.log(today);
-        console.log(startDate);
         if (startDate > today) {
             const totalDaysRequested = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
             if (totalDaysRequested > employee.remainingHolidays) {

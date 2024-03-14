@@ -26,13 +26,16 @@
                   <td><%= request.status %></td>
                   <td>
                       <% if (request.status === 'pending') { %>
-                          <form action="/approve-request/<%= request.id %>" method="POST">
+                          <form action="/approve-request/<%=request.id%>" method="POST">
                               <button type="submit">Approve</button>
                           </form>
-                          <form action="/reject-request/<%= request.id %>" method="POST">
+                          <form action="/reject-request/<%=request.id %>" method="POST">
                               <button type="submit">Reject</button>
                           </form>
-                      <% } %>
+                        <% } %>
+                        <form action="/delete-request/<%=request.id%>" method="POST">
+                            <button type="submit">Delete</button>
+                        </form>
                   </td>
               </tr>
           <% }); %>

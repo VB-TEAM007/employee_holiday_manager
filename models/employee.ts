@@ -1,5 +1,5 @@
 export class Employee {
-    id: number;
+    id: number = 0;
     name: string;
     remainingHolidays: number;
 
@@ -8,7 +8,7 @@ export class Employee {
         name: string,
         remainingHolidays: number
     ){
-        this.id = id;
+        this.id = id++;
         this.name = name;
         this.remainingHolidays = remainingHolidays;
     }
