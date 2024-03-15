@@ -2,7 +2,7 @@ import { HolidayRequest } from './models/holidayRequest';
 import express from "express";
 import bodyParser from 'body-parser';
 import HolidayRequests from './storage/holidayRequests';
-import {validateHolidayRequest} from './utils/validation'
+import { validateHolidayRequest } from './utils/validation'
 import { Employee } from './models/employee';
 import Employeers from './storage/emplioyeers';
 
@@ -49,7 +49,7 @@ app.get('/add-request', (req, res)  => {
 });
 
 app.post('/add-request', (req, res)  => {
-    const holidayRequest = new HolidayRequest( requests.length , parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
+    const holidayRequest = new HolidayRequest(requests.length, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
     //console.log(holidayRequest.id);
     if (validateHolidayRequest(holidayRequest, Employees)){
     Requests.addHolidayRequest(holidayRequest);
