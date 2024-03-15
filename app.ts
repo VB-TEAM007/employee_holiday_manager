@@ -2,7 +2,7 @@ import { HolidayRequest } from './models/holidayRequest';
 import express from "express";
 import bodyParser from 'body-parser';
 import HolidayRequests from './storage/holidayRequests';
-import {validateHolidayRequest} from './utils/validation'
+import { validateHolidayRequest } from './utils/validation'
 import { Employee } from './models/employee';
 import Employeers from './storage/emplioyeers';
 
