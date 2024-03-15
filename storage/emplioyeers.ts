@@ -1,7 +1,8 @@
 import {Employee } from '../models/employee';
 
 export default class Employeers {
-    getEmployeeById(employeeId: number) {
+    
+    getEmployeeById( employeeId: number) {
         return this.employees.find(employee => employee.id === employeeId);
     }
     
