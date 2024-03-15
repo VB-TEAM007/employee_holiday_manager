@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const holidayRequests_1 = __importDefault(require("./storage/holidayRequests"));
+const validation_1 = require("./utils/validation");
 const employee_1 = require("./models/employee");
 const emplioyeers_1 = __importDefault(require("./storage/emplioyeers"));
 const axios_1 = __importDefault(require("axios"));
@@ -60,7 +61,7 @@ app.get('/add-request', (req, res) => {
 //     res.redirect('/requests');    
 //     }
 //     else res.render('add-request')
-// });
+// }); 
 app.post('/approve-request/:id', (req, res) => {
     const request = Requests.getHolidayById(parseInt(req.params.id));
     if (request) {
@@ -70,16 +71,30 @@ app.post('/approve-request/:id', (req, res) => {
 });
 app.post('/reject-request/:id', (req, res) => {
     const request = Requests.getHolidayById(parseInt(req.params.id));
-    console.log(req.params.id);
     if (request) {
         request.status = 'rejected';
     }
     res.redirect('/requests');
 });
 app.post('/delete-request/:id', (req, res) => {
-    console.log(Requests.getHolidayRequests());
     Requests.deleteHolidayRequests(req.body.id);
     res.redirect('/requests');
+});
+app.get('/update-request/:id', (req, res) => {
+    const id = req.params.id;
+    res.render('update-request', { id });
+});
+app.post('/update-request/:id', (req, res) => {
+    const id = req.params.id;
+    const request = Requests.getHolidayById(parseInt(id));
+    if (request) {
+        request.startDate = req.body.startDate;
+        request.endDate = req.body.endDate;
+        if ((0, validation_1.validateHolidayRequest)(request, Employees)) {
+            res.redirect('/requests');
+        }
+    }
+    res.render('update-request', { id });
 });
 app.get('/public-holidays', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -89,9 +104,11 @@ app.get('/public-holidays', (req, res) => __awaiter(void 0, void 0, void 0, func
     }
     catch (error) {
         console.error('Error fetching public holidays:', error);
-        res.status(500).send('Error fetching public holidays');
     }
 }));
+app.get('*', (req, res) => {
+    res.status(404).render('error');
+});
 app.get('*', (req, res) => {
     res.status(404).render('error');
 });

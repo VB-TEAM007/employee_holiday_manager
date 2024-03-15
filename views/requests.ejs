@@ -32,6 +32,9 @@
               <form action="/reject-request/<%=request.id %>" method="POST">
                 <button type="submit">Reject</button>
               </form>
+              <form action="/update-request/<%=request.id %>" method="GET">
+                <button type="submit">Update</button>
+              </form>
             <% } %>
             <form action="/delete-request/<%=request.id%>" method="POST">
                 <button type="submit">Delete</button>
