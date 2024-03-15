@@ -60,16 +60,30 @@ app.post('/approve-request/:id', (req, res) => {
 });
 app.post('/reject-request/:id', (req, res) => {
     const request = Requests.getHolidayById(parseInt(req.params.id));
-    console.log(req.params.id);
     if (request) {
         request.status = 'rejected';
     }
     res.redirect('/requests');
 });
 app.post('/delete-request/:id', (req, res) => {
-    console.log(Requests.getHolidayRequests());
     Requests.deleteHolidayRequests(req.body.id);
     res.redirect('/requests');
+});
+app.get('/update-request/:id', (req, res) => {
+    const id = req.params.id;
+    res.render('update-request', { id });
+});
+app.post('/update-request/:id', (req, res) => {
+    const id = req.params.id;
+    const request = Requests.getHolidayById(parseInt(id));
+    if (request) {
+        request.startDate = req.body.startDate;
+        request.endDate = req.body.endDate;
+        if ((0, validation_1.validateHolidayRequest)(request, Employees)) {
+            res.redirect('/requests');
+        }
+    }
+    res.render('update-request', { id });
 });
 app.get('*', (req, res) => {
     res.status(404).render('error');
