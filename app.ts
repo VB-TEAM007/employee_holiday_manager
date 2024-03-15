@@ -84,21 +84,18 @@ app.post('/delete-request/:id', (req, res) => {
   res.redirect('/requests');
 });
 
-app.get('*', (req, res)  => {
-  res.status(404).render('error');
+app.get('/public-holidays', async (req, res) => {
+  try {
+    const response = await axios.get(BASE_URL);
+    const holidays: { date: string, name: string }[] = response.data.map((h: { date: string, name: string }) => ({ date: h.date, name: h.name }));
+    res.render('public-holidays', { holidays });
+  } catch (error) {
+    console.error('Error fetching public holidays:', error);
+  }
 });
 
-app.get('/public-holidays', async (req, res) => {
-  const response = await axios.get(BASE_URL);
-  const result = response.data;
-  
-  return result;
-  // res.json(result.map((jsonData: any) => ({
-  //   date: jsonData.date,
-  //   localName: jsonData.localName,
-  //   name: jsonData.name,
-  //   countryCode: jsonData.countryCode,
-  // })));
+app.get('*', (req, res)  => {
+  res.status(404).render('error');
 });
 
 app.listen(PORT, HOST, () => {

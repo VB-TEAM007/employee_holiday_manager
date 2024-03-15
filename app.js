@@ -81,20 +81,20 @@ app.post('/delete-request/:id', (req, res) => {
     Requests.deleteHolidayRequests(req.body.id);
     res.redirect('/requests');
 });
+app.get('/public-holidays', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield axios_1.default.get(BASE_URL);
+        const holidays = response.data.map((h) => ({ date: h.date, name: h.name }));
+        res.render('public-holidays', { holidays });
+    }
+    catch (error) {
+        console.error('Error fetching public holidays:', error);
+        res.status(500).send('Error fetching public holidays');
+    }
+}));
 app.get('*', (req, res) => {
     res.status(404).render('error');
 });
-app.get('/public-holidays', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield axios_1.default.get(BASE_URL);
-    const result = response.data;
-    return result;
-    // res.json(result.map((jsonData: any) => ({
-    //   date: jsonData.date,
-    //   localName: jsonData.localName,
-    //   name: jsonData.name,
-    //   countryCode: jsonData.countryCode,
-    // })));
-}));
 app.listen(PORT, HOST, () => {
     console.log(`Server started: http://${HOST}:${PORT}`);
 });
