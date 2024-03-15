@@ -1,10 +1,10 @@
 import { HolidayRequest } from "../models/holidayRequest";
 import Employeers from "../storage/emplioyeers";
-import HolidayRequests from "../storage/holidayRequests";
+// import workWithApi from "./workWithAPI"
+
+const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export function validateHolidayRequest(request: HolidayRequest, Employees: Employeers): boolean {
-  const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
-  const employees = Employees.getEmployees();
   console.log(request);
 
   const employee = Employees.getEmployeeById(request.employeeId);
@@ -19,7 +19,11 @@ export function validateHolidayRequest(request: HolidayRequest, Employees: Emplo
     
     if (startDate > today) {
       const totalDaysRequested = Math.ceil((endDate.getTime() - startDate.getTime()) / MILLISECONDS_PER_DAY);
-      if (totalDaysRequested > employee.remainingHolidays) {
+
+      if (totalDaysRequested < employee.remainingHolidays) {
+        // workWithApi.main(startDate, endDate);
+
+
         console.log('Holiday request exceeds the maximum consecutive days allowed');
         return false;
       } else {
@@ -33,4 +37,10 @@ export function validateHolidayRequest(request: HolidayRequest, Employees: Emplo
     console.log('Employeer with this ID is not found');
     return false;
   }
+}
+
+export function f(startDate: Date, endDate: Date) {
+  // if (validateHolidayRequest) {
+  //   workWithApi.main()
+  // } 
 }
