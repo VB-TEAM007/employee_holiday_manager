@@ -10,4 +10,12 @@ export default class HolidayRequests {
     getHolidayRequests(): HolidayRequest[] {
         return this.holidayRequests;
     }
+
+    getHolidayById( id: number) {
+        return this.holidayRequests.find(holidayRequest => parseInt(holidayRequest.id.toString()) === id);
+    }
+
+    deleteHolidayRequests(id: number): HolidayRequest[] {
+        return this.holidayRequests.splice(id, 1);
+    }
 }
