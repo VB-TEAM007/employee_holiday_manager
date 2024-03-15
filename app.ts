@@ -59,7 +59,7 @@ app.get('/add-request', (req, res)  => {
 //     res.redirect('/requests');    
 //     }
 //     else res.render('add-request')
-// });
+// }); 
 
 app.post('/approve-request/:id', (req, res)  => {
   const request = Requests.getHolidayById(parseInt(req.params.id));
