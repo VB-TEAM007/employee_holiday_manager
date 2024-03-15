@@ -5,7 +5,6 @@ exports.f = exports.validateHolidayRequest = void 0;
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 function validateHolidayRequest(request, Employees) {
     console.log(request);
-
     const employee = Employees.getEmployeeById(request.employeeId);
     if (employee) {
         const today = new Date();

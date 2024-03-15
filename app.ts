@@ -58,7 +58,7 @@ app.get('/add-request', (req, res)  => {
 //     res.redirect('/requests');    
 //     }
 //     else res.render('add-request')
-// });
+// }); 
 
 app.post('/approve-request/:id', (req, res)  => {
   const request = Requests.getHolidayById(parseInt(req.params.id));
@@ -99,21 +99,22 @@ app.post('/update-request/:id', (req, res) =>{
   res.render('update-request', {id});
 })
 
+app.get('/public-holidays', async (req, res) => {
+  try {
+    const response = await axios.get(BASE_URL);
+    const holidays: { date: string, name: string }[] = response.data.map((h: { date: string, name: string }) => ({ date: h.date, name: h.name }));
+    res.render('public-holidays', { holidays });
+  } catch (error) {
+    console.error('Error fetching public holidays:', error);
+  }
+});
+
 app.get('*', (req, res)  => {
   res.status(404).render('error');
 });
 
-app.get('/public-holidays', async (req, res) => {
-  const response = await axios.get(BASE_URL);
-  const result = response.data;
-  
-  return result;
-  // res.json(result.map((jsonData: any) => ({
-  //   date: jsonData.date,
-  //   localName: jsonData.localName,
-  //   name: jsonData.name,
-  //   countryCode: jsonData.countryCode,
-  // })));
+app.get('*', (req, res)  => {
+  res.status(404).render('error');
 });
 
 app.listen(PORT, HOST, () => {
