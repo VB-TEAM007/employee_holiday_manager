@@ -40,25 +40,30 @@ app.get('/employees', (req, res)  => {
   res.render('employees', { employees });
 });
 
-app.get('/requests', (req, res)  => {
+app.get('/requests', async (req, res)  => {
   const holidayRequests = Requests.getHolidayRequests();
-  res.render('requests', { holidayRequests });
+  try {
+    const response = await axios.get(BASE_URL);
+    const publicHolidays: { date: string, name: string, localName: string}[] = response.data.map((h: { date: string, name: string, localName: string}) => ({ date: h.date, name: h.name, localName: h.localName }));
+    res.render('requests', { holidayRequests, publicHolidays });
+  } catch (error) {
+    console.error('Error fetching public holidays:', error);
+  }
 });
 
 app.get('/add-request', (req, res)  => {
   res.render('add-request');
 });
 
-// var requestId = 0;
-// app.post('/add-request', (req, res)  => {
-//     const requests = Requests.getHolidayRequests();
-//     const holidayRequest = new HolidayRequest( requestId++, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
-//     if (validateHolidayRequest(holidayRequest, Employees)){
-//     Requests.addHolidayRequest(holidayRequest);
-//     res.redirect('/requests');    
-//     }
-//     else res.render('add-request')
-// }); 
+var requestId = 0;
+app.post('/add-request', (req, res)  => {
+    const holidayRequest = new HolidayRequest( requestId++, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
+    if (validateHolidayRequest(holidayRequest, Employees)){
+    Requests.addHolidayRequest(holidayRequest);
+    res.redirect('/requests');    
+    }
+    else res.render('add-request')
+}); 
 
 app.post('/approve-request/:id', (req, res)  => {
   const request = Requests.getHolidayById(parseInt(req.params.id));

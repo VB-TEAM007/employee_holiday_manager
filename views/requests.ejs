@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HOLIDAYS</title>
 </head>
-<body>
+<body style="width: 75%;">
   <h1>List of Holiday Requests</h1>
-  <table>
+  <table style="float: left;">
     <thead>
       <tr>
         <th>Employee Id</th>
@@ -43,7 +43,25 @@
         </tr>
       <% }); %>
     </tbody>
+    <a href="/">&larr;Go back</a>
   </table>
-  <a href="/">&larr;Go back</a>
+  <table style="float: right;">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Local Name</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% publicHolidays.forEach(request => { %>
+        <tr>
+          <td><%= request.name %></td>
+          <td><%= request.localName %></td>
+          <td><%= request.date %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>  
 </body>
 </html>

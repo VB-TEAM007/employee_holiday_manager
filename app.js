@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const holidayRequest_1 = require("./models/holidayRequest");
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const holidayRequests_1 = __importDefault(require("./storage/holidayRequests"));
@@ -45,23 +46,30 @@ app.get('/employees', (req, res) => {
     const employees = Employees.getEmployees();
     res.render('employees', { employees });
 });
-app.get('/requests', (req, res) => {
+app.get('/requests', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const holidayRequests = Requests.getHolidayRequests();
-    res.render('requests', { holidayRequests });
-});
+    try {
+        const response = yield axios_1.default.get(BASE_URL);
+        const publicHolidays = response.data.map((h) => ({ date: h.date, name: h.name, localName: h.localName }));
+        res.render('requests', { holidayRequests, publicHolidays });
+    }
+    catch (error) {
+        console.error('Error fetching public holidays:', error);
+    }
+}));
 app.get('/add-request', (req, res) => {
     res.render('add-request');
 });
-// var requestId = 0;
-// app.post('/add-request', (req, res)  => {
-//     const requests = Requests.getHolidayRequests();
-//     const holidayRequest = new HolidayRequest( requestId++, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
-//     if (validateHolidayRequest(holidayRequest, Employees)){
-//     Requests.addHolidayRequest(holidayRequest);
-//     res.redirect('/requests');    
-//     }
-//     else res.render('add-request')
-// }); 
+var requestId = 0;
+app.post('/add-request', (req, res) => {
+    const holidayRequest = new holidayRequest_1.HolidayRequest(requestId++, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
+    if ((0, validation_1.validateHolidayRequest)(holidayRequest, Employees)) {
+        Requests.addHolidayRequest(holidayRequest);
+        res.redirect('/requests');
+    }
+    else
+        res.render('add-request');
+});
 app.post('/approve-request/:id', (req, res) => {
     const request = Requests.getHolidayById(parseInt(req.params.id));
     if (request) {

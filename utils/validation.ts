@@ -16,10 +16,7 @@ export function validateHolidayRequest(request: HolidayRequest, Employees: Emplo
     if (startDate > today) {
       const totalDaysRequested = Math.ceil((endDate.getTime() - startDate.getTime()) / MILLISECONDS_PER_DAY);
 
-      if (totalDaysRequested < employee.remainingHolidays) {
-        // workWithApi.main(startDate, endDate);
-
-
+      if (totalDaysRequested > employee.remainingHolidays) {
         console.log('Holiday request exceeds the maximum consecutive days allowed');
         return false;
       } else {
@@ -33,10 +30,4 @@ export function validateHolidayRequest(request: HolidayRequest, Employees: Emplo
     console.log('Employeer with this ID is not found');
     return false;
   }
-}
-
-export function f(startDate: Date, endDate: Date) {
-  // if (validateHolidayRequest) {
-  //   workWithApi.main()
-  // } 
 }
