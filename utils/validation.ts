@@ -1,5 +1,6 @@
 import { HolidayRequest } from "../models/holidayRequest";
 import Employeers from "../storage/emplioyeers";
+import HolidayRequests from "../storage/holidayRequests";
 
 export function validateHolidayRequest(request: HolidayRequest, Employees: Employeers): boolean {
   const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -24,7 +25,7 @@ export function validateHolidayRequest(request: HolidayRequest, Employees: Emplo
       } else {
         return true;
       }
-    } else{
+    } else {
       console.log('Date is lower than todays date');
       return false;
     }

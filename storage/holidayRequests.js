@@ -10,5 +10,11 @@ class HolidayRequests {
     getHolidayRequests() {
         return this.holidayRequests;
     }
+    getHolidayById(id) {
+        return this.holidayRequests.find(holidayRequest => parseInt(holidayRequest.id.toString()) === id);
+    }
+    deleteHolidayRequests(id) {
+        return this.holidayRequests.splice(id, 1);
+    }
 }
 exports.default = HolidayRequests;
