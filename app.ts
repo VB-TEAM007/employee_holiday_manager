@@ -5,9 +5,13 @@ import HolidayRequests from './storage/holidayRequests';
 import { validateHolidayRequest } from './utils/validation'
 import { Employee } from './models/employee';
 import Employeers from './storage/emplioyeers';
+import axios from 'axios';
 
 const PORT = 3033;
 const HOST = 'localhost';
+const CURRENT_YEAR = new Date().getFullYear();
+const UKRAINE_COUNTRY_CODE = 'UA'
+const BASE_URL = `https://date.nager.at/api/v3/PublicHolidays/${CURRENT_YEAR}/${UKRAINE_COUNTRY_CODE}`;
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -45,16 +49,16 @@ app.get('/add-request', (req, res)  => {
   res.render('add-request');
 });
 
-var requestId = 0;
-app.post('/add-request', (req, res)  => {
-    const requests = Requests.getHolidayRequests();
-    const holidayRequest = new HolidayRequest( requestId++, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
-    if (validateHolidayRequest(holidayRequest, Employees)){
-    Requests.addHolidayRequest(holidayRequest);
-    res.redirect('/requests');    
-    }
-    else res.render('add-request')
-});
+// var requestId = 0;
+// app.post('/add-request', (req, res)  => {
+//     const requests = Requests.getHolidayRequests();
+//     const holidayRequest = new HolidayRequest( requestId++, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
+//     if (validateHolidayRequest(holidayRequest, Employees)){
+//     Requests.addHolidayRequest(holidayRequest);
+//     res.redirect('/requests');    
+//     }
+//     else res.render('add-request')
+// });
 
 app.post('/approve-request/:id', (req, res)  => {
   const request = Requests.getHolidayById(parseInt(req.params.id));
@@ -97,6 +101,19 @@ app.post('/update-request/:id', (req, res) =>{
 
 app.get('*', (req, res)  => {
   res.status(404).render('error');
+});
+
+app.get('/public-holidays', async (req, res) => {
+  const response = await axios.get(BASE_URL);
+  const result = response.data;
+  
+  return result;
+  // res.json(result.map((jsonData: any) => ({
+  //   date: jsonData.date,
+  //   localName: jsonData.localName,
+  //   name: jsonData.name,
+  //   countryCode: jsonData.countryCode,
+  // })));
 });
 
 app.listen(PORT, HOST, () => {

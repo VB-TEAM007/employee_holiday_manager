@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateHolidayRequest = void 0;
+exports.f = exports.validateHolidayRequest = void 0;
+// import workWithApi from "./workWithAPI"
+const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 function validateHolidayRequest(request, Employees) {
-    const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+    console.log(request);
+
     const employee = Employees.getEmployeeById(request.employeeId);
     if (employee) {
         const today = new Date();
@@ -10,7 +13,8 @@ function validateHolidayRequest(request, Employees) {
         const endDate = new Date(request.endDate);
         if (startDate > today) {
             const totalDaysRequested = Math.ceil((endDate.getTime() - startDate.getTime()) / MILLISECONDS_PER_DAY);
-            if (totalDaysRequested > employee.remainingHolidays) {
+            if (totalDaysRequested < employee.remainingHolidays) {
+                // workWithApi.main(startDate, endDate);
                 console.log('Holiday request exceeds the maximum consecutive days allowed');
                 return false;
             }
@@ -29,3 +33,9 @@ function validateHolidayRequest(request, Employees) {
     }
 }
 exports.validateHolidayRequest = validateHolidayRequest;
+function f(startDate, endDate) {
+    // if (validateHolidayRequest) {
+    //   workWithApi.main()
+    // } 
+}
+exports.f = f;
