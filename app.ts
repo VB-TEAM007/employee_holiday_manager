@@ -6,12 +6,10 @@ import { validateHolidayRequest } from './utils/validation'
 import { Employee } from './models/employee';
 import Employeers from './storage/emplioyeers';
 import axios from 'axios';
+import { getPublicHoildays } from './utils/workWithAPI';
 
 const PORT = 3033;
 const HOST = 'localhost';
-const CURRENT_YEAR = new Date().getFullYear();
-const UKRAINE_COUNTRY_CODE = 'UA'
-const BASE_URL = `https://date.nager.at/api/v3/PublicHolidays/${CURRENT_YEAR}/${UKRAINE_COUNTRY_CODE}`;
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -19,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const Requests = new HolidayRequests();
 const Employees = new Employeers();
+
 
 app.get('/', (req, res) => {
   res.render('index');
@@ -41,14 +40,9 @@ app.get('/employees', (req, res)  => {
 });
 
 app.get('/requests', async (req, res)  => {
-  const holidayRequests = Requests.getHolidayRequests();
-  try {
-    const response = await axios.get(BASE_URL);
-    const publicHolidays: { date: string, name: string, localName: string}[] = response.data.map((h: { date: string, name: string, localName: string}) => ({ date: h.date, name: h.name, localName: h.localName }));
-    res.render('requests', { holidayRequests, publicHolidays });
-  } catch (error) {
-    console.error('Error fetching public holidays:', error);
-  }
+  const holidayRequests = Requests.getHolidayRequests();  
+  const publicHolidays = await getPublicHoildays();
+  res.render('requests', { holidayRequests, publicHolidays });
 });
 
 app.get('/add-request', (req, res)  => {
@@ -56,9 +50,9 @@ app.get('/add-request', (req, res)  => {
 });
 
 var requestId = 0;
-app.post('/add-request', (req, res)  => {
+app.post('/add-request', async (req, res)  => {
     const holidayRequest = new HolidayRequest( requestId++, parseInt(req.body.employeeId), req.body.startDate, req.body.endDate);
-    if (validateHolidayRequest(holidayRequest, Employees)){
+    if (await validateHolidayRequest(holidayRequest, Employees)){
     Requests.addHolidayRequest(holidayRequest);
     res.redirect('/requests');    
     }
@@ -91,28 +85,18 @@ app.get('/update-request/:id', (req, res) => {
   res.render('update-request', {id});
 })
 
-app.post('/update-request/:id', (req, res) =>{
+app.post('/update-request/:id', async (req, res) =>{
   const id = req.params.id;
   const request = Requests.getHolidayById(parseInt(id));
   if(request){
     request.startDate = req.body.startDate;
     request.endDate = req.body.endDate;
-    if(validateHolidayRequest(request, Employees)){
+    if(await validateHolidayRequest(request, Employees)){
       res.redirect('/requests');
     }
   }
   res.render('update-request', {id});
 })
-
-app.get('/public-holidays', async (req, res) => {
-  try {
-    const response = await axios.get(BASE_URL);
-    const holidays: { date: string, name: string }[] = response.data.map((h: { date: string, name: string }) => ({ date: h.date, name: h.name }));
-    res.render('public-holidays', { holidays });
-  } catch (error) {
-    console.error('Error fetching public holidays:', error);
-  }
-});
 
 app.get('*', (req, res)  => {
   res.status(404).render('error');
