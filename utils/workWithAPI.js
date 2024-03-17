@@ -12,40 +12,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllHolidays = void 0;
-const holidayResponseDtoAPI_1 = require("../models/holidayResponseDtoAPI");
+exports.countHolidaysBetweenDates = exports.getPublicHoildays = void 0;
 const axios_1 = __importDefault(require("axios"));
-const BASE_URL = `https://date.nager.at/api/v3/PublicHolidays/2024/UA`;
-function getAllHolidays() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield axios_1.default.get(BASE_URL);
-        return response.data.map((holiday) => {
-            return new holidayResponseDtoAPI_1.HolidayResponse(new Date(holiday.date), holiday.localName, holiday.name, holiday.countryCode);
-        });
-    });
-}
-exports.getAllHolidays = getAllHolidays;
-function getHolidaysInPeriod() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield getAllHolidays();
-        const startDate = new Date(2024, 2, 6);
-        const endDate = new Date(2024, 2, 9);
-        return response.filter(holiday => {
-            const holidayDate = new Date(holiday.date);
-            return holidayDate >= startDate && holidayDate <= endDate;
-        });
-    });
-}
-function main() {
+const CURRENT_YEAR = new Date().getFullYear();
+const UKRAINE_COUNTRY_CODE = 'UA';
+const BASE_URL = `https://date.nager.at/api/v3/PublicHolidays/${CURRENT_YEAR}/${UKRAINE_COUNTRY_CODE}`;
+function getPublicHoildays() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const holidaysss = yield getHolidaysInPeriod();
-            console.log(holidaysss);
-            console.log(holidaysss.length);
+            const response = yield axios_1.default.get(BASE_URL);
+            const publicHolidays = response.data.map((holiday) => ({
+                date: new Date(holiday.date),
+                name: holiday.name,
+                localName: holiday.localName
+            }));
+            return publicHolidays;
         }
         catch (error) {
-            console.error("An error occurred:", error);
+            console.error('Error fetching public holidays:', error);
         }
     });
 }
-main();
+exports.getPublicHoildays = getPublicHoildays;
+function countHolidaysBetweenDates(holidays, startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    let count = 0;
+    holidays.forEach(holiday => {
+        const holidayDate = new Date(holiday.date);
+        if (holidayDate >= start && holidayDate <= end) {
+            count++;
+        }
+    });
+    return count;
+}
+exports.countHolidaysBetweenDates = countHolidaysBetweenDates;
