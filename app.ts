@@ -1,23 +1,21 @@
-import { HolidayRequest } from './models/holidayRequest';
+import { HolidayRequest } from './src/models/holidayRequest';
 import express from "express";
 import bodyParser from 'body-parser';
-import HolidayRequests from './storage/holidayRequests';
-import { validateHolidayRequest } from './utils/validation'
-import { Employee } from './models/employee';
-import Employeers from './storage/emplioyeers';
-import axios from 'axios';
-import { getPublicHoildays } from './utils/workWithAPI';
+import HolidayRequests from './src/storage/holidayRequests';
+import { validateHolidayRequest } from './src/utils/validation'
+import { Employee } from './src/models/employee';
+import Employeers from './src/storage/emplioyeers';
+import { getPublicHoildays } from './src/utils/workWithAPI';
 
 const PORT = 3033;
 const HOST = 'localhost';
 
 const app = express();
 app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 const Requests = new HolidayRequests();
 const Employees = new Employeers();
-
 
 app.get('/', (req, res) => {
   res.render('index');
