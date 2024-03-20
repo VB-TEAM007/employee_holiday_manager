@@ -1,55 +1,94 @@
 import { HolidayRequest } from "../models/holidayRequest";
-import Employeers from "../storage/emplioyeers";
-import { getPublicHoildays } from "./workWithAPI";
+import { HolidayResponse } from "../models/holidayResponse";
+import { getPublicUkrainianHoildays } from "./workWithAPI";
+import EmployeeService from "../services/employeeService";
+import HolidayRequestRepository from "../repositories/holidayRequestRepository";
 
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+const employeeService = new EmployeeService();
+const requestRepository = new HolidayRequestRepository();
 
-export async function validateHolidayRequest(request: HolidayRequest, Employees: Employeers): Promise<boolean> {  
-  const employee = Employees.getEmployeeById(request.employeeId);
+export async function validateHolidayRequest(request: HolidayRequest): Promise<boolean> {  
+  const employee = employeeService.getById(request.employeeId);
+
   const today: Date = new Date();
   const startDate: Date = new Date(request.startDate);
   const endDate: Date = new Date(request.endDate);
 
-  if (!employee) {
-    console.log('Employeer with this ID is not found');
+  const totalDaysRequested = Math.ceil((endDate.getTime() - startDate.getTime()) / MILLISECONDS_PER_DAY);
+  const publicHolidays = await getPublicUkrainianHoildays();
+  const holidaysBetweenDates = await getHolidaysBetweenDates(startDate, endDate);
+
+  if (employee === null) {
+    console.log('Employee with this ID is not found');
     return false;
   }
 
-  if (startDate > today) {
-    const totalDaysRequested = Math.ceil((endDate.getTime() - startDate.getTime()) / MILLISECONDS_PER_DAY);
-    const publicHolidays = await getPublicHoildays();
-    if (publicHolidays){
-    const holidays = countHolidaysBetweenDates(publicHolidays, startDate, endDate);
-      if(holidays > 1){
-        employee.remainingHolidays += +holidays;
-        console.log(`your request falls on ${holidays} holiday, ${holidays} day has been added to your possible vacation days`);
-      }
-      if (totalDaysRequested > employee.remainingHolidays) {
-        console.log('Holiday request exceeds the maximum consecutive days allowed');
-        return false;
-      } else {
-        return true;
-      }
-    } else {
-      return false;
-    }
-  } else {
-    console.log('Date is lower than todays date');
+  if (startDate <= today) {
+    console.log('Start date cannot be earlier than today date');
     return false;
+  }
+
+  if (!hasAlreadyBookingInThisPeriod(request)) {
+    console.log(`User already have some request in this period from ${startDate} to ${endDate}`);
+    return false;
+  }
+
+  if (totalDaysRequested > employee.remainingHolidays) {
+    console.log('Holiday request exceeds the maximum consecutive days allowed');
+    return false;
+  }
+
+  if (publicHolidays) {
+    if (holidaysBetweenDates.length > 1){
+      employee.remainingHolidays = +employee.remainingHolidays + +holidaysBetweenDates.length;
+      console.log(`your request falls on ${JSON.stringify(holidaysBetweenDates)} holiday,
+         ${holidaysBetweenDates.length} day(s) has been added to your possible vacation days`);
+    }
+  }
+  
+  employee.remainingHolidays = employee.remainingHolidays - totalDaysRequested;
+
+  return true;
+}
+
+async function getHolidaysBetweenDates(startDate: Date, endDate: Date): Promise<HolidayResponse[]> {
+  try {
+    const publicHolidays: HolidayResponse[] | undefined = await getPublicUkrainianHoildays();
+    
+    if (!publicHolidays) {
+      throw new Error('Failed to fetch public holidays');
+    }
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const holidaysBetweenDates: HolidayResponse[] = [];
+
+    publicHolidays.forEach(holiday => {
+      const holidayDate = new Date(holiday.date);
+      if (holidayDate >= start && holidayDate <= end) {
+        holidaysBetweenDates.push(holiday);
+      }
+    });
+
+    return holidaysBetweenDates;
+  } catch (error) {
+    console.error('Error fetching public holidays:', error);
+    return [];
   }
 }
 
-function countHolidaysBetweenDates(holidays:{ date: string, name: string, localName: string }[], startDate: Date, endDate: Date) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  let count = 0;
+function hasAlreadyBookingInThisPeriod(request: HolidayRequest): boolean {
+  const requests = requestRepository.getAll();
 
-  holidays.forEach(holiday => {
-    const holidayDate = new Date(holiday.date);
-    if (holidayDate >= start && holidayDate <= end) {
-      count++;
+  for (const existingRequest of requests) {
+    if (existingRequest.employeeId === request.employeeId) {
+      if (request.startDate >= existingRequest.startDate 
+          && request.endDate <= existingRequest.endDate) {
+        console.log('Employee already have holiday request in this period')
+        return false
+      }
     }
-  });
-
-  return count;
+  }
+  return true;
 }
