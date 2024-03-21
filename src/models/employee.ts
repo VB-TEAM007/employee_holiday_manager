@@ -1,15 +1,7 @@
-export class Employee {
-  id: number;
-  name: string;
-  remainingHolidays: number;
+import { ObjectId } from "mongodb";
 
-  constructor(
-    id: number,
-    name: string,
-    remainingHolidays: number
-  ){
-    this.id = id;
-    this.name = name;
-    this.remainingHolidays = remainingHolidays;
-  }
+export default interface Employee {
+    name?: string,
+    remainingHolidays?: number,
+    _id?: ObjectId,
 }

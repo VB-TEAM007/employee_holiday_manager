@@ -1,12 +1,14 @@
-import { Employee } from '../models/employee';
+import Employee from '../models/employee';
 
 export default class EmployeeRepository {
   private employees: Employee[] = [];
     
   getById(id: number): Employee | null {
-    const employee = this.employees.find(employee => employee.id === id);
+    const employee = this.employees as Employee;
+    // .find(employee => employee.id === id);
 
-    return employee !== undefined ? employee : null;
+    return employee;
+    //  !== undefined ? employee : null;
   }
   
   add(employee: Employee): Employee {

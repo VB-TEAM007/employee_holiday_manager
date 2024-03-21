@@ -1,27 +1,24 @@
 import express from 'express';
-import { Employee } from '../models/employee';
-import EmployeeService from '../services/employeeService';
+import Employee from '../models/employee';
+import { collections } from '../utils/database';
 
-const employeeService = new EmployeeService();
 const employeeRouter = express.Router();
 
 employeeRouter.get('/add-employee', (req, res)  => {
   res.render('add-employee');
 });
 
-employeeRouter.post('/add-employee', (req, res) => {
-  const newEmployee = new Employee(
-    employeeService.getAll().length,
-    req.body.name,
-    req.body.remainingHolidays
-  );
-
-  employeeService.add(newEmployee)
+employeeRouter.post('/add-employee', async (req, res) => {
+  const newEmployee = {
+    name: req.body.name,
+    remainingHolidays: req.body.remainingHolidays,
+  }
+  await collections.employee?.insertOne(newEmployee);
   res.redirect('employees');
 });
 
-employeeRouter.get('/employees', (req, res)  => {
-  const employees = employeeService.getAll();
+employeeRouter.get('/employees', async(req, res)  => {
+  const employees = (await collections.employee?.find({}).toArray()) as Employee[];
   res.render('employees', { employees });
 });
 

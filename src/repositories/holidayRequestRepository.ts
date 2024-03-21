@@ -1,4 +1,4 @@
-import { HolidayRequest } from "../models/holidayRequest";
+import HolidayRequest from "../models/holidayRequest";
 
 export default class HolidayRequestRepository {
   private holidayRequests: HolidayRequest[] = [];
@@ -14,9 +14,10 @@ export default class HolidayRequestRepository {
   }
 
   getById(id: number): HolidayRequest | null {
-    const request = this.holidayRequests.find(holidayRequest => holidayRequest.id === id);
+    const request = this.holidayRequests as HolidayRequest;
+    // .find(holidayRequest => holidayRequest.id === id);
 
-    return request !== undefined ? request : null;
+    return request;
   }
 
   delete(id: number): void {

@@ -1,5 +1,5 @@
 import HolidayRequestRepository from "../repositories/holidayRequestRepository";
-import { HolidayRequest } from "../models/holidayRequest";
+import HolidayRequest from "../models/holidayRequest";
 import { validateHolidayRequest } from "../utils/validation";
 
 const holidayRequestRepository = new HolidayRequestRepository();
@@ -16,20 +16,20 @@ export default class HolidayRequestService {
     return request;
   }
 
-  async add(request: HolidayRequest): Promise<HolidayRequest | null> {
-    if (await validateHolidayRequest(request)) {
-      try {
-        const addedRequest = await holidayRequestRepository.add(request);
+  // async add(request: HolidayRequest): Promise<HolidayRequest | null> {
+  //   if (await validateHolidayRequest(request)) {
+  //     try {
+  //       const addedRequest = await holidayRequestRepository.add(request);
         
-        return addedRequest;
-      } catch (error) {
-        console.error('Error adding holiday request:', error);
-        return null;
-      }
-    } else {
-      return null;
-    }
-  }
+  //       return addedRequest;
+  //     } catch (error) {
+  //       console.error('Error adding holiday request:', error);
+  //       return null;
+  //     }
+  //   } else {
+  //     return null;
+  //   }
+  // }
 
   delete(id: number): void {
     if (this.getAll().length - 1 >= id) {
