@@ -1,25 +1,22 @@
-import EmployeeRepository from '../repositories/employeeRepository';
+import { ObjectId } from 'mongodb';
 import Employee from '../models/employee';
-
-const employeeRepository = new EmployeeRepository();
+import { collections } from '../utils/database';
 
 export default class EmployeeService {
 
-  getAll(): Employee[] {
-    return employeeRepository.getAll();
+   async getAll(): Promise<Employee[]> {
+    return await collections.employee?.find({}).toArray() as Employee[];
   }
 
-  add(employee: Employee): Employee {
-    return employeeRepository.add(employee);
-  }
-
-  getById(id: number): Employee {
-    const employee = employeeRepository.getById(id);
-    
-    if (employee === null) {
-      throw new Error(`Cannot find employee with id: ${id}`);
+  async add(name: String, remainingHolidays: String): Promise<void> {
+    const newEmployee = {
+      name: name,
+      remainingHolidays: remainingHolidays,
     }
+    await collections.employee?.insertOne(newEmployee);
+  }
 
-    return employee;
+  async getById(id: ObjectId): Promise<Employee>{
+    return await collections.employee?.findOne({ _id: id}) as Employee;
   }
 }

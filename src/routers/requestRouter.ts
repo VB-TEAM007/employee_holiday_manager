@@ -1,57 +1,43 @@
-import express, { query } from 'express';
-import * as validation from '../utils/validation';
-import { collections } from '../utils/database';
-import Employee from '../models/employee';
-import {ObjectId} from 'mongodb';
-import HolidayRequest from '../models/holidayRequest';
+import express from 'express';
+import { ObjectId } from 'mongodb';
+import HolidayRequestService from '../services/holidayRequestService';
+import EmployeeService from '../services/employeeService';
 
 const requestRouter = express.Router();
+const holidayRequestService = new HolidayRequestService();
+const employeeService = new EmployeeService();
 
 requestRouter.get('/requests', async (req, res)  => {
-  const employees = (await collections.employee?.find({}).toArray()) as Employee[];
-  const holidayRequests = (await collections.requests?.find({}).toArray()) as HolidayRequest[];
+  const employees = await employeeService.getAll();
+  const holidayRequests = await holidayRequestService.getAll();
   res.render('requests', { holidayRequests, employees });
 });
 
 requestRouter.get('/add-request', async(req, res)  => {
-  const employees = (await collections.employee?.find({}).toArray()) as Employee[];
+  const employees = await holidayRequestService.getAll();
   res.render('add-request', {employees} );
 });
 
 requestRouter.post('/add-request', async (req, res) => {
-  const employee = await collections.employee?.findOne({ name: req.body.name });
-    const newRequest: HolidayRequest = {
-      employeeId: employee!._id,
-      startDate: req.body.startDate,
-      endDate: req.body.endDate,
-      status: 'pending'
-    }    
-    if (await validation.validateHolidayRequest(newRequest)){
-    await collections.requests?.insertOne(newRequest);
+  if (await holidayRequestService.add(req.body.name, req.body.startDate, req.body.endDate)){
     res.render('add-request');
-    }
-    else
+  } else {
     res.redirect('/requests');
+  }
 }); 
 
-requestRouter.post('/approve-request/:id', async (req, res)  => {
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) };
-  await collections.requests?.updateOne(query, { $set: {status: 'approved'} });
+requestRouter.post('/approve-request/:id', async (req, res)  => {  
+  await holidayRequestService.updateStatus(new ObjectId(req.params.id), 'approved');
   res.redirect('/requests');
 });
 
 requestRouter.post('/reject-request/:id', async(req, res)  => {
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) };
-  await collections.requests?.updateOne(query, { $set: {status: 'rejected'} });
+  await holidayRequestService.updateStatus(new ObjectId(req.params.id), 'rejected');
   res.redirect('/requests');
 });
 
 requestRouter.post('/delete-request/:id', async(req, res) => {  
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) };
-  await collections.requests?.deleteOne(query);
+  await holidayRequestService.delete(new ObjectId(req.params.id));
   res.redirect('/requests');
 });
 
@@ -61,16 +47,10 @@ requestRouter.get('/update-request/:id', (req, res) => {
 })
 
 requestRouter.post('/update-request/:id', async (req, res) =>{
-  const id = req.params.id;   
-  const request = await collections.requests?.findOne({ _id: new ObjectId(id)});
-  if(await validation.validateHolidayRequest(request!)){
-  await collections.requests?.updateOne({_id: new ObjectId(id)}, {
-    $set: {
-      startDate: req.body.startDate,
-      endDate: req.body.endDate
-    }});
-    res.redirect('/requests');
+  if(await holidayRequestService.updateRequest(req.params.id, req.body.startDate, req.body.endDate)){
+      res.redirect('/requests');
   }
+  const id = new ObjectId(req.params.id)
   res.render('update-request', {id});
 });
 
