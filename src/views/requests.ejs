@@ -21,25 +21,26 @@
         </tr>
       </thead>
       <tbody>
-        <% holidayRequests.forEach(request => { %>
-          <tr>
-            <td><%= request.employeeId %></td>
+        <% holidayRequests.forEach(request => {
+            const employee = employees.find(employee => employee._id.equals(request.employeeId)); %>
+            <tr>
+            <td><%= employee.name %></td>
             <td><%= request.startDate %></td>
             <td><%= request.endDate %></td>
             <td><%= request.status %></td>
             <td>
               <% if (request.status === 'pending') { %>
-                <form action="/approve-request/<%=request.id%>" method="POST">
+                <form action="/approve-request/<%=request._id%>" method="POST">
                   <button type="submit">Approve</button>
                 </form>
-                <form action="/reject-request/<%=request.id %>" method="POST">
+                <form action="/reject-request/<%=request._id %>" method="POST">
                   <button type="submit">Reject</button>
                 </form>
-                <form action="/update-request/<%=request.id %>" method="GET">
+                <form action="/update-request/<%=request._id %>" method="GET">
                   <button type="submit">Update</button>
                 </form>
               <% } %>
-              <form action="/delete-request/<%=request.id%>" method="POST">
+              <form action="/delete-request/<%=request._id%>" method="POST">
                   <button type="submit">Delete</button>
               </form>
             </td>

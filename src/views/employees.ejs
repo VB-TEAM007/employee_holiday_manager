@@ -8,13 +8,16 @@
 <body>
   <h1>List of employees</h1>
     <ul>
-      <% employees.forEach(employee => { %>
-        <li>
-          <strong>ID:</strong> <%= employee.id %>, 
-          <strong>Name:</strong> <%= employee.name %>, 
-          <strong>Remaining Holidays:</strong> <%= employee.remainingHolidays %>
-        </li>
-      <% }); %>
+      <% if (employees.length === 0) { %>
+        <p>No employees</p>
+      <% } else { %>
+        <% employees.forEach(employee => { %>
+          <li>
+            <strong>Name:</strong> <%= employee.name %>,
+            <strong>Remaining Holidays:</strong> <%= employee.remainingHolidays %>
+          </li>
+        <% }); %>
+      <% } %>
     </ul>
   <a href="/">&larr;Go back</a>
 </body>

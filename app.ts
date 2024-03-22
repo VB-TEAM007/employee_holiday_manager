@@ -3,6 +3,7 @@ import path from 'path';
 import employeeRouter from './src/routers/employeeRouter';
 import requestRouter from './src/routers/requestRouter';
 import publicHolidayRouter from './src/routers/publicHolidayRouter';
+import { connectToDatabase } from './src/utils/database';
 
 const PORT = 3033;
 const HOST = 'localhost';
@@ -23,5 +24,6 @@ app.get('*', (req, res)  => {
 });
 
 app.listen(PORT, HOST, () => {
+  connectToDatabase();
   console.log(`Server started: http://${HOST}:${PORT}`);
 });

@@ -1,41 +1,57 @@
-import HolidayRequestRepository from "../repositories/holidayRequestRepository";
-import { HolidayRequest } from "../models/holidayRequest";
+import HolidayRequest from "../models/holidayRequest";
+import { collections } from "../utils/database";
 import { validateHolidayRequest } from "../utils/validation";
-
-const holidayRequestRepository = new HolidayRequestRepository();
+import { ObjectId } from 'mongodb';
 
 export default class HolidayRequestService {
 
-  getAll(): HolidayRequest[] {
-    return holidayRequestRepository.getAll();
+  async getAll(): Promise<HolidayRequest[]> {
+    return await collections.requests?.find({}).toArray() as HolidayRequest[];
   }
 
-  getById(id: number): HolidayRequest | null {
-    const request = holidayRequestRepository.getById(id);
-
-    return request;
+  async getById(id: ObjectId): Promise<HolidayRequest> {
+    return await collections.requests?.find({_id: id}) as HolidayRequest;
+  }
+  async getByArrayId(id: ObjectId): Promise<HolidayRequest[]> {
+    return await collections.requests?.find({_id: id}).toArray() as HolidayRequest[];
   }
 
-  async add(request: HolidayRequest): Promise<HolidayRequest | null> {
-    if (await validateHolidayRequest(request)) {
-      try {
-        const addedRequest = await holidayRequestRepository.add(request);
-        
-        return addedRequest;
-      } catch (error) {
-        console.error('Error adding holiday request:', error);
-        return null;
-      }
+  async add(name: String, startDate: Date, endDate: Date): Promise<Boolean> {
+    const employee = await collections.employee?.findOne({ name: name});
+    const newRequest: HolidayRequest = {
+      employeeId: employee!._id,
+      startDate: startDate,
+      endDate: endDate,
+      status: 'pending'
+    }    
+    if (await validateHolidayRequest(newRequest)){
+      await collections.requests?.insertOne(newRequest);
+      return true;
     } else {
-      return null;
+      return false;
     }
   }
 
-  delete(id: number): void {
-    if (this.getAll().length - 1 >= id) {
-      holidayRequestRepository.delete(id);
-    } else {
-      throw new Error(`Cannot delete request by id: ${id}`);
+  async updateStatus(id: ObjectId, status:String): Promise<void>{
+    const query = { _id: id };
+    await collections.requests?.updateOne(query, { $set: {status: status} });
+  }
+
+  async delete(id: ObjectId): Promise<void> {
+    const query = { _id: id };
+    await collections.requests?.deleteOne(query);
+  }
+
+  async updateRequest(id: string, startDate: Date, endDate: Date): Promise<Boolean>{
+    const request = await this.getById(new ObjectId(id));
+    if(await validateHolidayRequest(request!)){
+    await collections.requests?.updateOne({_id: new ObjectId(id)}, {
+      $set: {
+        startDate: startDate,
+        endDate: endDate
+      }});
+      return true;
     }
+    return false;
   }
 }

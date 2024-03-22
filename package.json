@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "npm run compile && node app.js",
+    "compile": "tsc"
   },
   "author": "Bohdan Bilko, Yevhenii Voloshchuk",
   "license": "ISC",
@@ -13,8 +14,10 @@
     "alert": "^6.0.1",
     "axios": "^1.6.7",
     "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.9",
     "express": "^4.18.3",
+    "mongodb": "^6.5.0",
     "popups": "^1.1.3",
     "typescript": "^5.4.2"
   }
