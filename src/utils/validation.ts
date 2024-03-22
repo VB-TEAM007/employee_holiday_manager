@@ -25,9 +25,8 @@ export async function validateHolidayRequest(request: HolidayRequest): Promise<s
     return errorMessage;
   }
 
-  if (await !hasAlreadyBookingInThisPeriod(request)) {
-    errorMessage = `User already have some request in this period`;
-    console.log(errorMessage);
+  if (await hasAlreadyBookingInThisPeriod(request)) {
+    errorMessage = "Employee already have holiday request in this period";
     return errorMessage;
   }
 
@@ -35,7 +34,6 @@ export async function validateHolidayRequest(request: HolidayRequest): Promise<s
 
   if (totalDaysRequested > employee.remainingHolidays!) {
     errorMessage = 'Holiday request exceeds the maximum consecutive days allowed';
-    console.log(errorMessage);
     return errorMessage;
   }
 
@@ -44,7 +42,6 @@ export async function validateHolidayRequest(request: HolidayRequest): Promise<s
       employee!.remainingHolidays = +employee.remainingHolidays! + +holidaysBetweenDates.length;
       errorMessage = `your request falls on ${JSON.stringify(holidaysBetweenDates)} holiday,
          ${holidaysBetweenDates.length} day(s) has been added to your possible vacation days`;
-         console.log(errorMessage);
          return errorMessage;
     }
   }
@@ -80,13 +77,13 @@ async function getHolidaysBetweenDates(startDate: Date, endDate: Date): Promise<
 
 async function hasAlreadyBookingInThisPeriod(request: HolidayRequest): Promise<boolean> {
   const holidayRequestService = new HolidayRequestService();
-  const requests: HolidayRequest[] = await holidayRequestService.getArrayByEmployeeId(request.employeeId!);
+  const requests: HolidayRequest[] = await holidayRequestService.getArrayPendingRequestsByEmployeeId(request.employeeId!);
   requests.forEach(existingRequest => {
     if ((request.startDate! >= existingRequest.startDate! && request.startDate! <= existingRequest.endDate!) ||
     (request.endDate! >= existingRequest.startDate! && request.endDate! <= existingRequest.endDate!) ||
-    (request.startDate! <= existingRequest.startDate! && request.endDate! >= existingRequest.endDate!)) {
-        // console.log('Employee already have holiday request in this period')
-        return false
+    (request.startDate! <= existingRequest.startDate! && request.endDate! >= existingRequest.endDate!))
+    {
+        return false;
       }
     });
   return true;
