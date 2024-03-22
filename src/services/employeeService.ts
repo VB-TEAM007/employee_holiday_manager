@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import Employee from '../models/employee';
 import { collections } from '../utils/database';
+import HollidayRequest from '../models/holidayRequest';
 
 export default class EmployeeService {
 

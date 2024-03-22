@@ -7,6 +7,7 @@ import { collections } from "./database";
 
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 
+const holidayRequestService =  new HolidayRequestService();
 const employeeService = new EmployeeService();
 
 export async function validateHolidayRequest(request: HolidayRequest): Promise<boolean> { 
@@ -19,18 +20,13 @@ export async function validateHolidayRequest(request: HolidayRequest): Promise<b
   const publicHolidays = await getPublicUkrainianHoildays();
   const holidaysBetweenDates = await getHolidaysBetweenDates(startDate, endDate);
 
-  if (employee === null) {
-    console.log('Employee with this ID is not found');
-    return false;
-  }
-
   if (startDate <= today) {
     console.log('Start date cannot be earlier than today date');
     return false;
   }
 
-  if (!hasAlreadyBookingInThisPeriod(request)) {
-    console.log(`User already have some request in this period from ${startDate} to ${endDate}`);
+  if (await hasAlreadyBookingInThisPeriod(request)) {
+    console.log(`User already have some request in this period`);
     return false;
   }
 
@@ -79,7 +75,7 @@ async function getHolidaysBetweenDates(startDate: Date, endDate: Date): Promise<
 }
 
 async function hasAlreadyBookingInThisPeriod(request: HolidayRequest): Promise<boolean> {
-  const requests: HolidayRequest[] = await collections.requests?.find({_id: request._id}).toArray() as HolidayRequest[];
+  const requests: HolidayRequest[] = await collections.requests?.find({employeeId: request.employeeId}).toArray() as HolidayRequest[];
   requests.forEach(existingRequest => {
     if ((request.startDate! >= existingRequest.startDate! && request.startDate! <= existingRequest.endDate!) ||
     (request.endDate! >= existingRequest.startDate! && request.endDate! <= existingRequest.endDate!) ||

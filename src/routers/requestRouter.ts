@@ -14,15 +14,16 @@ requestRouter.get('/requests', async (req, res)  => {
 });
 
 requestRouter.get('/add-request', async(req, res)  => {
-  const employees = await holidayRequestService.getAll();
-  res.render('add-request', {employees} );
+  const employees = await employeeService.getAll();
+  res.render('add-request', { employees } );
 });
 
 requestRouter.post('/add-request', async (req, res) => {
   if (await holidayRequestService.add(req.body.name, req.body.startDate, req.body.endDate)){
-    res.render('add-request');
+   res.redirect('/requests');
   } else {
-    res.redirect('/requests');
+    const employees = await employeeService.getAll();
+    res.render('add-request', {employees});
   }
 }); 
 
