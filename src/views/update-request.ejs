@@ -6,6 +6,12 @@
   <title>ADD HOLIDAY</title>
 </head>
 <body>
+  <script>
+    if(status === 400){
+      const errorMessage = "<%= errorMessage %>";
+      alert(errorMessage);
+    }
+  </script>
   <h1>Edit request</h1>
   <form action="/update-request/<%=id%>" method="POST">
       <label for="startDate">Start Date:</label>

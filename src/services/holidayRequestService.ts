@@ -2,7 +2,6 @@ import HolidayRequest from "../models/holidayRequest";
 import { collections } from "../utils/database";
 import { getTotalDaysRequested, validateHolidayRequest } from "../utils/validation";
 import { ObjectId } from 'mongodb';
-import EmployeeService from "./employeeService";
 
 export default class HolidayRequestService {
 
@@ -59,11 +58,11 @@ export default class HolidayRequestService {
     employee!.remainingHolidays = employee!.remainingHolidays! + totalDaysRequested;
     const errorMessage = await validateHolidayRequest(request!)
     if(errorMessage === null){
-    await collections.requests?.updateOne({_id: new ObjectId(id)}, {
-      $set: {
-        startDate: startDate,
-        endDate: endDate
-      }});
+      await collections.requests?.updateOne({_id: new ObjectId(id)}, {
+        $set: {
+          startDate: startDate,
+          endDate: endDate
+        }});
       const totalDaysRequested = getTotalDaysRequested(startDate, endDate!); 
       employee!.remainingHolidays = employee!.remainingHolidays! - totalDaysRequested;
       return null;

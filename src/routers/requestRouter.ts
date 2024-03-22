@@ -50,11 +50,14 @@ requestRouter.get('/update-request/:id', (req, res) => {
 })
 
 requestRouter.post('/update-request/:id', async (req, res) =>{
-  if(await holidayRequestService.updateRequest(req.params.id, req.body.startDate, req.body.endDate)){
+  const errorMessage = await holidayRequestService.updateRequest(req.params.id, req.body.startDate, req.body.endDate);
+  if(errorMessage === null){
       res.redirect('/requests');
+  } else {
+    const id = new ObjectId(req.params.id)
+    const status = 400;
+    res.status(400).render('update-request', {id, errorMessage, status});
   }
-  const id = new ObjectId(req.params.id)
-  res.status(200).render('update-request', {id});
 });
 
 export default requestRouter;
