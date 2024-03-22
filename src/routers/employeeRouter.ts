@@ -5,7 +5,7 @@ const employeeRouter = express.Router();
 const employeeService = new EmployeeService;
 
 employeeRouter.get('/add-employee', (req, res)  => {
-  res.render('add-employee');
+  res.status(200).render('add-employee');
 });
 
 employeeRouter.post('/add-employee', async (req, res) => {
@@ -15,7 +15,7 @@ employeeRouter.post('/add-employee', async (req, res) => {
 
 employeeRouter.get('/employees', async(req, res)  => {
   const employees = await employeeService.getAll();
-  res.render('employees', { employees });
+  res.status(200).render('employees', { employees });
 });
 
 export default employeeRouter;

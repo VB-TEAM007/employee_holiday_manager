@@ -1,51 +1,52 @@
 import HolidayRequest from "../models/holidayRequest";
 import { HolidayResponse } from "../models/holidayResponse";
 import { getPublicUkrainianHoildays } from "./workWithAPI";
-import EmployeeService from "../services/employeeService";
 import HolidayRequestService from "../services/holidayRequestService";
-import { collections } from "./database";
+import EmployeeService from "../services/employeeService";
 
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 
-const holidayRequestService =  new HolidayRequestService();
 const employeeService = new EmployeeService();
+let errorMessage: string | null;
 
-export async function validateHolidayRequest(request: HolidayRequest): Promise<boolean> { 
+export async function validateHolidayRequest(request: HolidayRequest): Promise<string | null>{ 
   const employee = await employeeService.getById(request.employeeId!);
   const today: Date = new Date();
   const startDate: Date = new Date(request.startDate!);
   const endDate: Date = new Date(request.endDate!);
 
-  const totalDaysRequested = Math.ceil((endDate.getTime() - startDate.getTime()) / MILLISECONDS_PER_DAY);
   const publicHolidays = await getPublicUkrainianHoildays();
   const holidaysBetweenDates = await getHolidaysBetweenDates(startDate, endDate);
 
   if (startDate <= today) {
-    console.log('Start date cannot be earlier than today date');
-    return false;
+    errorMessage = 'Start date cannot be earlier than today date';
+    return errorMessage;
   }
 
   if (await hasAlreadyBookingInThisPeriod(request)) {
-    console.log(`User already have some request in this period`);
-    return false;
+    errorMessage = `User already have some request in this period`;
+    console.log(errorMessage);
+    return errorMessage;
   }
 
+  const totalDaysRequested = getTotalDaysRequested(request.startDate!, request.endDate!);
+
   if (totalDaysRequested > employee.remainingHolidays!) {
-    console.log('Holiday request exceeds the maximum consecutive days allowed');
-    return false;
+    errorMessage = 'Holiday request exceeds the maximum consecutive days allowed';
+    console.log(errorMessage);
+    return errorMessage;
   }
 
   if (publicHolidays) {
     if (holidaysBetweenDates.length > 1){
       employee!.remainingHolidays = +employee.remainingHolidays! + +holidaysBetweenDates.length;
-      console.log(`your request falls on ${JSON.stringify(holidaysBetweenDates)} holiday,
-         ${holidaysBetweenDates.length} day(s) has been added to your possible vacation days`);
+      errorMessage = `your request falls on ${JSON.stringify(holidaysBetweenDates)} holiday,
+         ${holidaysBetweenDates.length} day(s) has been added to your possible vacation days`;
+         console.log(errorMessage);
     }
   }
-  
-  employee!.remainingHolidays = employee!.remainingHolidays! - totalDaysRequested;
-
-  return true;
+  errorMessage = null;
+  return errorMessage;
 }
 
 async function getHolidaysBetweenDates(startDate: Date, endDate: Date): Promise<HolidayResponse[]> {
@@ -75,15 +76,21 @@ async function getHolidaysBetweenDates(startDate: Date, endDate: Date): Promise<
 }
 
 async function hasAlreadyBookingInThisPeriod(request: HolidayRequest): Promise<boolean> {
-  const requests: HolidayRequest[] = await collections.requests?.find({employeeId: request.employeeId}).toArray() as HolidayRequest[];
+  const holidayRequestService = new HolidayRequestService();
+  const requests: HolidayRequest[] = await holidayRequestService.getArrayByEmployeeId(request.employeeId!);
   requests.forEach(existingRequest => {
     if ((request.startDate! >= existingRequest.startDate! && request.startDate! <= existingRequest.endDate!) ||
     (request.endDate! >= existingRequest.startDate! && request.endDate! <= existingRequest.endDate!) ||
     (request.startDate! <= existingRequest.startDate! && request.endDate! >= existingRequest.endDate!)) {
-        console.log('Employee already have holiday request in this period')
+        // console.log('Employee already have holiday request in this period')
         return false
       }
     });
   return true;
 }
 
+export function getTotalDaysRequested(startDate: Date, endDate: Date){
+  const newEndDate = new Date(endDate);
+  const newStartDate = new Date(startDate);
+  return Math.ceil((newEndDate.getTime() - newStartDate.getTime()) / MILLISECONDS_PER_DAY);
+}

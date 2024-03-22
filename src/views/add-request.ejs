@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ADD HOLIDAY</title>
 </head>
-<body>
+<body> 
+      <script>
+        if(status === 400){
+          const errorMessage = "<%= errorMessage %>";
+          alert(errorMessage);
+        }
+      </script>
   <h1>Add holiday</h1>
   <form action="/add-request" method="POST">
     <form action="/add-request" method="POST">
