@@ -15,4 +15,10 @@
       <button type="submit">Submit</button>
   </form>
 </body>
+<% if(statusCode === 400){ %>
+  <script>
+      const errorMessage = "<%= errorMessage %>";
+      alert(errorMessage);
+  </script>
+  <% } %>
 </html>
