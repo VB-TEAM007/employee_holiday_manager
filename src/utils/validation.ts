@@ -7,9 +7,11 @@ import EmployeeService from "../services/employeeService";
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 
 const employeeService = new EmployeeService();
+
 let errorMessage: string | null;
 
 export async function validateHolidayRequest(request: HolidayRequest): Promise<string | null>{ 
+  errorMessage = null;
   const employee = await employeeService.getById(request.employeeId!);
   const today: Date = new Date();
   const startDate: Date = new Date(request.startDate!);
@@ -18,12 +20,12 @@ export async function validateHolidayRequest(request: HolidayRequest): Promise<s
   const publicHolidays = await getPublicUkrainianHoildays();
   const holidaysBetweenDates = await getHolidaysBetweenDates(startDate, endDate);
 
-  if (startDate <= today) {
+  if (startDate <= today || endDate <= startDate) {
     errorMessage = 'Start date cannot be earlier than today date';
     return errorMessage;
   }
 
-  if (await hasAlreadyBookingInThisPeriod(request)) {
+  if (await !hasAlreadyBookingInThisPeriod(request)) {
     errorMessage = `User already have some request in this period`;
     console.log(errorMessage);
     return errorMessage;
@@ -43,6 +45,7 @@ export async function validateHolidayRequest(request: HolidayRequest): Promise<s
       errorMessage = `your request falls on ${JSON.stringify(holidaysBetweenDates)} holiday,
          ${holidaysBetweenDates.length} day(s) has been added to your possible vacation days`;
          console.log(errorMessage);
+         return errorMessage;
     }
   }
   errorMessage = null;

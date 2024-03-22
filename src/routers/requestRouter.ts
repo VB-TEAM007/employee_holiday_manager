@@ -15,7 +15,7 @@ requestRouter.get('/requests', async (req, res)  => {
 
 requestRouter.get('/add-request', async(req, res)  => {
   const employees = await employeeService.getAll();
-  res.status(200).render('add-request', { employees } );
+  res.status(200).render('add-request', { employees, statusCode: res.statusCode} );
 });
 
 requestRouter.post('/add-request', async (req, res) => {
@@ -24,8 +24,7 @@ requestRouter.post('/add-request', async (req, res) => {
    res.redirect('/requests');
   } else {
     const employees = await employeeService.getAll();
-    const status = 400;
-    res.status(400).render('add-request', {employees, errorMessage, status});
+    res.status(400).render('add-request', {employees, errorMessage, statusCode: res.statusCode});
   }
 }); 
 
@@ -55,8 +54,7 @@ requestRouter.post('/update-request/:id', async (req, res) =>{
       res.redirect('/requests');
   } else {
     const id = new ObjectId(req.params.id)
-    const status = 400;
-    res.status(400).render('update-request', {id, errorMessage, status});
+    res.status(400).render('update-request', {id, errorMessage, statusCode: res.statusCode});
   }
 });
 
