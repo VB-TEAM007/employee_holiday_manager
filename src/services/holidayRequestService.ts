@@ -12,8 +12,8 @@ export default class HolidayRequestService {
   async getById(id: ObjectId): Promise<HolidayRequest> {
     return await collections.requests?.find({_id: id}) as HolidayRequest;
   }
-  async getArrayByEmployeeId(id: ObjectId): Promise<HolidayRequest[]> {
-    return await collections.requests?.find({_id: id}).toArray() as HolidayRequest[];
+  async getArrayPendingRequestsByEmployeeId(id: ObjectId): Promise<HolidayRequest[]> {
+    return await collections.requests?.find({employeeId: id}).toArray() as HolidayRequest[];
   }
 
   async add(name: String, startDate: Date, endDate: Date): Promise<string | null> {
@@ -24,10 +24,11 @@ export default class HolidayRequestService {
       endDate: endDate,
       status: 'pending'
     }  
-    const totalDaysRequested = getTotalDaysRequested(startDate, endDate); 
-    employee!.remainingHolidays = employee!.remainingHolidays! - totalDaysRequested;  
+    const totalDaysRequested = getTotalDaysRequested(startDate, endDate);   
     const errorMessage = await validateHolidayRequest(newRequest);
     if (errorMessage === null){
+      await collections.employee?.updateOne({_id: employee?._id}, {$set: 
+        {remainingHolidays:  employee!.remainingHolidays! - totalDaysRequested}}); 
       await collections.requests?.insertOne(newRequest);
       return null;
     } else {
@@ -42,7 +43,8 @@ export default class HolidayRequestService {
     if (status === 'rejected'){         
       const employee = await collections.employee?.findOne({_id: request.employeeId!});
       const totalDaysRequested = getTotalDaysRequested(request.startDate!, request.endDate!);
-      employee!.remainingHolidays = employee!.remainingHolidays! + totalDaysRequested;
+      await collections.employee?.updateOne({_id: employee?._id}, {$set: 
+        {remainingHolidays:  employee!.remainingHolidays! + totalDaysRequested}});   
     }
   }
 
@@ -54,16 +56,17 @@ export default class HolidayRequestService {
   async updateRequest(id: string, startDate: Date, endDate: Date): Promise<string | null>{
     const request = await this.getById(new ObjectId(id));   
     const employee = await collections.employee?.findOne({_id: request.employeeId!});
-    const totalDaysRequested = getTotalDaysRequested(request.startDate!, request.endDate!); 
-    employee!.remainingHolidays = employee!.remainingHolidays! + totalDaysRequested;
     const errorMessage = await validateHolidayRequest(request!)
-    if(errorMessage === null){
+    if(errorMessage === null){      
+    var totalDaysRequested = getTotalDaysRequested(request.startDate!, request.endDate!); 
+      await collections.employee?.updateOne({_id: employee?._id}, {$set: 
+        {remainingHolidays:  employee!.remainingHolidays! + totalDaysRequested}}); 
       await collections.requests?.updateOne({_id: new ObjectId(id)}, {
         $set: {
           startDate: startDate,
           endDate: endDate
         }});
-      const totalDaysRequested = getTotalDaysRequested(startDate, endDate!); 
+      totalDaysRequested = getTotalDaysRequested(startDate, endDate!); 
       employee!.remainingHolidays = employee!.remainingHolidays! - totalDaysRequested;
       return null;
     }

@@ -23,4 +23,11 @@
   </form>
   <a href="/"> &larr;Go back</a>
 </body>
+
+<% if(statusCode === 400){ %>
+  <script>
+      const errorMessage = "<%= errorMessage %>";
+      alert(errorMessage);
+  </script>
+  <% } %>
 </html>
