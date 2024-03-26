@@ -90,14 +90,9 @@ async function getArrayPendingRequestsByEmployeeId(employeeId: number) {
 
 export async function updateRequest(id: string, startDate: Date, endDate: Date): Promise<string | null> {
   try {
-    console.log("ID: " + parseInt(id))
-    const request: any = await holidayRequest.findByPk(parseInt(id)); // Додайте await перед викликом findByPk
-    console.log("request.employeeId: " + request.employeeId)
+    const request: any = await holidayRequest.findByPk(parseInt(id));
     const employee: any = await employeeController.getById(request.employeeId);
     const errorMessage = await validateHolidayRequest(request)
-    console.log("REQ FROM UPD " + request)
-    console.log("EMPL FROM UPD " + employee)
-    console.log("ERROR MESSAGE FROM upDREQ " + errorMessage)
 
     if (errorMessage === null) {
       const totalDaysRequested = getTotalDaysRequested(request.startDate!, request.endDate!);
@@ -117,14 +112,6 @@ export async function updateRequest(id: string, startDate: Date, endDate: Date):
     return errorMessage;
   } catch (error) {
     console.error("Error retrieving request by ID:", error);
-    throw error;
-  }
-}
-
-async function getById(id: number) {
-  try {
-    await holidayRequest.findByPk(id);
-  } catch (error) {
     throw error;
   }
 }

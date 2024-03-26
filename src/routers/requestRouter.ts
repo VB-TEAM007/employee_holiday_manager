@@ -117,8 +117,8 @@ requestRouter.post('/update-request/:id', async (req, res) =>{
   try {
     const id = selectedDatabase === 'postgres' ? parseInt(req.params.id) : new ObjectId(req.params.id);
     const errorMessage = selectedDatabase === 'postgres' 
-      ? await holidayRequestController.updateRequest(req.params.id, req.body.startDate, req.body.endDate) 
-      : await holidayRequestService.updateRequest(req.params.id, req.body.startDate, req.body.endDate);
+      ? await holidayRequestController.updateRequest(String(id), req.body.startDate, req.body.endDate) 
+      : await holidayRequestService.updateRequest(String(id), req.body.startDate, req.body.endDate);
   
     if (errorMessage === null) {
       res.redirect('/requests');
