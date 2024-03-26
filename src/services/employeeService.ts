@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
-import Employee from '../models/employee';
-import { collections } from '../utils/database';
+import Employee from '../models/employee.js';
+import { collections } from '../utils/database.js';
 
 export default class EmployeeService {
 
