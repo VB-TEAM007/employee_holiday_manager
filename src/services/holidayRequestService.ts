@@ -44,7 +44,7 @@ export default class HolidayRequestService {
       const employee = await collections.employee?.findOne({_id: request.employeeId!});
       const totalDaysRequested = getTotalDaysRequested(request.startDate!, request.endDate!);
       await collections.employee?.updateOne({_id: employee?._id}, {$set: 
-        {remainingHolidays:  employee!.remainingHolidays! + totalDaysRequested}});   
+        {remainingHolidays:  employee!.remainingHolidays! + totalDaysRequested}});
     }
   }
 
