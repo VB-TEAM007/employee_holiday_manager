@@ -21,7 +21,7 @@ app.use('/', employeeRouter);
 app.use('/', requestRouter);
 app.use('/public-holidays', publicHolidayRouter);
 
-app.get('/', (req, res) => res.status(200).render('index'));
+app.get('/', (req, res) => res.status(200).render('index', { db: process.env.SELECTED_DATABASE }));
 
 app.get('*', (req, res)  => {
   res.status(404).render('error');

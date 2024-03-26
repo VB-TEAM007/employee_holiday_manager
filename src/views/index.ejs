@@ -14,8 +14,11 @@
   <a href="/public-holidays">See all public holidays of each country</a><br>
 
   <form action="/set-database" method="post">
+    <% if (db === 'postgres') { %>
     <button type="submit" name="database" value="mongo">Use MongoDB</button>
+    <% } else { %>
     <button type="submit" name="database" value="postgres">Use PostgreSQL</button>
+    <% } %>
   </form>
 </body>
 </html>
