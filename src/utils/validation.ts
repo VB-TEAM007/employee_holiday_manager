@@ -12,14 +12,10 @@ export async function validateHolidayRequest(request: any): Promise<string | nul
   let errorMessage: string | null = null;
   const selectedDatabase = process.env.SELECTED_DATABASE;
   const employeeId = parseInt(request.employeeId);
-  console.log("SELECTED DB " + selectedDatabase)
-  console.log("GET EMPLOYEE: " + await employeeController.getById(employeeId))
 
   const employee: any = selectedDatabase === 'postgres'
     ? await employeeController.getById(employeeId)
     : await employeeService.getById(request.employeeId!);
-  console.log('id = ' + parseInt(request.employeeId))
-  console.log("EMPLOYEE = " + employee)
   const today: Date = new Date();
   const startDate: Date = new Date(request.startDate!);
   const endDate: Date = new Date(request.endDate!);
