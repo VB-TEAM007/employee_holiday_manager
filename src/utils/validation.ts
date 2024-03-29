@@ -2,24 +2,13 @@ import { HolidayResponse } from "../models/holidayResponse.js";
 import { getPublicUkrainianHoildays } from "./workWithAPI.js";
 import HolidayRequestService from "../services/holidayRequestService.js";
 import EmployeeService from "../services/employeeService.js";
-import { employeeController } from "../controllers/employee.controller.js";
-import { holidayRequestController } from "../controllers/holidayRequest.controller.js";
 
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 const employeeService = new EmployeeService();
 
 export async function validateHolidayRequest(request: any): Promise<string | null>{ 
   let errorMessage: string | null = null;
-  const selectedDatabase = process.env.SELECTED_DATABASE;
-  const employeeId = parseInt(request.employeeId);
-  console.log(request.employeeId);
-  
-  console.log(employeeId);
-  
-
-  const employee: any = selectedDatabase === 'postgres'
-    ? await employeeController.getById(employeeId)
-    : await employeeService.getById(request.employeeId!);
+  const employee = await employeeService.getById(request.employeeId!);
   const today: Date = new Date();
   const startDate: Date = new Date(request.startDate!);
   const endDate: Date = new Date(request.endDate!);
@@ -87,21 +76,12 @@ async function hasAlreadyBookingInThisPeriod(request: any): Promise<boolean> {
   const holidayRequestService = new HolidayRequestService();
   const selectedDatabase = process.env.SELECTED_DATABASE;
   console.log(request.employeeId);  
-  const employeeId = parseInt(request.employeeId);
-  const requests: any = selectedDatabase === 'postgres'
-    ? await holidayRequestController.getArrayPendingRequestsByEmployeeId(employeeId)
-    : await holidayRequestService.getArrayPendingRequestsByEmployeeId(request.employeeId);
+  const requests = await holidayRequestService.getArrayPendingRequestsByEmployeeId(request.employeeId);
 
   await holidayRequestService.getArrayPendingRequestsByEmployeeId(request.employeeId);
   for (const existingRequest of requests) {
-    if (selectedDatabase === 'postgre'){
-      if (existingRequest.id === request.id) {
-        continue;
-      }
-    } else {
-      if (existingRequest._id === request._id){
-        continue;
-    }
+    if (existingRequest._id === request._id){
+      continue;
   }
     if (
       (request.startDate <= existingRequest.endDate) &&

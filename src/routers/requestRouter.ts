@@ -2,51 +2,29 @@ import express from 'express';
 import { ObjectId } from 'mongodb';
 import HolidayRequestService from '../services/holidayRequestService.js';
 import EmployeeService from '../services/employeeService.js';
-import { holidayRequestController } from '../controllers/holidayRequest.controller.js';
-import { employeeController } from '../controllers/employee.controller.js';
-import { isAuth } from '../utils/authUtils.js';
+import { isAdmin, isAuth } from '../utils/authUtils.js';
 
 const requestRouter = express.Router();
 const holidayRequestService = new HolidayRequestService();
 const employeeService = new EmployeeService();
 
-requestRouter.get('/requests', async (req, res)  => {
-  const selectedDatabase = process.env.SELECTED_DATABASE;
-
-  const employee: any = selectedDatabase === 'postgres' 
-    ? await employeeController.getEmployeebyJwt(req.cookies.access_token.token) 
-    : await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
-    
-  const holidayRequests = selectedDatabase === 'postgres' 
-    ? await holidayRequestController.getArrayRequestsByEmployeeId(employee.id) 
-    : await holidayRequestService.getArrayRequestsByEmployeeId(employee._id);
-
-const template = selectedDatabase === 'postgres' ? 'requestsForSQL' : 'requests';
-
-res.status(200).render(template, { holidayRequests, employee, access_token: req.cookies.access_token });
+requestRouter.get('/requests', isAuth, async (req, res)  => {
+  const employee = await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
+  const holidayRequests = await holidayRequestService.getArrayRequestsByEmployeeId(employee._id);
+  res.status(200).render('requests', { holidayRequests, employee, access_token: req.cookies.access_token });
 });
 
 requestRouter.get('/add-request', isAuth, async(req, res)  => {
-  const selectedDatabase = process.env.SELECTED_DATABASE;
-
-  const employee = selectedDatabase === 'postgres' 
-    ? await employeeController.getEmployeebyJwt(req.cookies.access_token.token) 
-    : await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
-
+  const employee = await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
   res.status(200).render('add-request', { employee, statusCode: res.statusCode} );
 });
 
 requestRouter.post('/add-request', async (req, res) => {
-  const selectedDatabase = process.env.SELECTED_DATABASE;
-  const employee: any = selectedDatabase === 'postgres' 
-    ? await employeeController.getEmployeebyJwt(req.cookies.access_token.token) 
-    : await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
+  const employee = await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
   const startDate = new Date(req.body.startDate);
   const endDate = new Date(req.body.endDate);
 
-  const errorMessage = selectedDatabase === 'postgres' 
-  ? await holidayRequestController.add(employee.username, startDate, endDate) 
-  : await holidayRequestService.add(employee.username, startDate, endDate);
+  const errorMessage =  await holidayRequestService.add(employee.username, startDate, endDate);
 
   if (errorMessage === null) {
     res.redirect('/requests');
@@ -55,16 +33,10 @@ requestRouter.post('/add-request', async (req, res) => {
   }
 });
 
-requestRouter.post('/approve-request/:id', async (req, res)  => {
-  const selectedDatabase = process.env.SELECTED_DATABASE;
+requestRouter.post('/approve-request/:id', isAdmin,async (req, res)  => {
   try {
-    if (selectedDatabase === 'postgres') {
-      const id = parseInt(req.params.id);
-      await holidayRequestController.updateStatus(id, 'approved');
-    } else {
-      const id = new ObjectId(req.params.id);
-      await holidayRequestService.updateStatus(id, 'approved');
-    }
+    const id = new ObjectId(req.params.id);
+    await holidayRequestService.updateStatus(id, 'approved');
     res.status(200).redirect('/requests');
   } catch (error) {
     console.error("Error approving request:", error);
@@ -72,15 +44,9 @@ requestRouter.post('/approve-request/:id', async (req, res)  => {
   }
 });
 
-requestRouter.post('/reject-request/:id', async(req, res)  => {
-  const selectedDatabase = process.env.SELECTED_DATABASE;
+requestRouter.post('/reject-request/:id', isAdmin, async(req, res)  => {
   try {
-    if (selectedDatabase === 'postgres') {
-      const id = parseInt(req.params.id);
-      await holidayRequestController.updateStatus(id, 'rejected');
-    } else {
-      await holidayRequestService.updateStatus(new ObjectId(req.params.id), 'rejected');
-    }
+    await holidayRequestService.updateStatus(new ObjectId(req.params.id), 'rejected');
     res.status(200).redirect('/requests');
   } catch (error) {
     console.error("Error rejecting request:", error);
@@ -88,15 +54,9 @@ requestRouter.post('/reject-request/:id', async(req, res)  => {
   }
 });
 
-requestRouter.post('/delete-request/:id', async(req, res) => {
-  const selectedDatabase = process.env.SELECTED_DATABASE;
+requestRouter.post('/delete-request/:id', isAdmin, async(req, res) => {
   try {
-    if (selectedDatabase === 'postgres') {
-      const id = parseInt(req.params.id);
-      await holidayRequestController.deleteRequest(id);
-    } else {
-      await holidayRequestService.delete(new ObjectId(req.params.id));
-    }
+    await holidayRequestService.delete(new ObjectId(req.params.id));
     res.redirect('/requests');
   } catch (error) {
     console.error("Error deleting request:", error);
@@ -110,12 +70,9 @@ requestRouter.get('/update-request/:id', isAuth, (req, res) => {
 })
 
 requestRouter.post('/update-request/:id', async (req, res) =>{
-  const selectedDatabase = process.env.SELECTED_DATABASE;
   try {
-    const id = selectedDatabase === 'postgres' ? parseInt(req.params.id) : new ObjectId(req.params.id);
-    const errorMessage = selectedDatabase === 'postgres' 
-      ? await holidayRequestController.updateRequest(String(id), req.body.startDate, req.body.endDate) 
-      : await holidayRequestService.updateRequest(String(id), req.body.startDate, req.body.endDate);
+    const id = new ObjectId(req.params.id);
+    const errorMessage = await holidayRequestService.updateRequest(String(id), req.body.startDate, req.body.endDate);
   
     if (errorMessage === null) {
       res.redirect('/requests');

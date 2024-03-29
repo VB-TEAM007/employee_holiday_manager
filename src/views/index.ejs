@@ -11,14 +11,14 @@
   <br>
   <% if(!access_token) { %>  
   <form action="/register" method="get" style="float: right;">
-    <button type="submit" name="register">Register</button>
+    <button type="submit">Register</button>
   </form>
   <form action="/login" method="get" style="float: right; margin-right: 15px;">
-    <button type="submit" name="login">Login</button>
+    <button type="submit">Login</button>
   </form>
   <% } else { %>
   <form action="/logout" method="get" style="float: right; margin-right: 15px;">
-    <button type="submit" name="login">LOGOUT</button>
+    <button type="submit">LOGOUT</button>
   </form>
   <% } %>
   </div>
@@ -34,12 +34,5 @@
     <br>
     <% } %>
   </div>
-  <form action="/set-database" method="post">
-    <% if (db === 'postgres') { %>
-    <button type="submit" name="database" value="mongo">Use MongoDB</button>
-    <% } else { %>
-    <button type="submit" name="database" value="postgres">Use PostgreSQL</button>
-    <% } %>
-  </form>
 </body>
 </html>
