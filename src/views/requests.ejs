@@ -19,13 +19,12 @@
           <th>Status</th>
           <%  if (employee.role === 'admin') { %>
             <th>Actions</th>
-          <% } %>
         </tr>
       </thead>
       <tbody>
         <% holidayRequests.forEach(request => { %>
             <tr style="border-bottom: 1pt solid black">
-            <td><%= employee.name %></td>
+            <td><%= employee.username %></td>
             <td><%= request.startDate %></td>
             <td><%= request.endDate %></td>
             <td><%= request.status %></td>
@@ -40,16 +39,35 @@
                 <form action="/update-request/<%=request._id %>" method="GET">
                   <button type="submit">Update</button>
                 </form>
-              <% } if (access_token) { %>
                 <form action="/delete-request/<%=request._id%>" method="POST">
                   <button type="submit">Delete</button>
                 </form>
-              <% } %>
             </td>
           </tr>
-        <% }); %>
+        <% } } ); %>
       </tbody>
-    <% } %>
+    <% } else { %>
+    </tr>
+  </thead>
+  <tbody>
+    <% holidayRequests.forEach(request => { %>
+        <tr style="border-bottom: 1pt solid black">
+        <td><%= employee.username %></td>
+        <td><%= request.startDate %></td>
+        <td><%= request.endDate %></td>
+        <td><%= request.status %></td>
+        <td>
+            <form action="/update-request/<%=request._id %>" method="GET">
+              <button type="submit">Update</button>
+            </form>
+            <form action="/delete-request/<%=request._id%>" method="POST">
+              <button type="submit">Delete</button>
+            </form>
+        </td>
+      </tr>
+    <% }); %>
+  </tbody>
+      <% }  }%>
     <a href="/">&larr;Go back</a>
   </table>
 </body>
