@@ -10,7 +10,13 @@ const employeeService = new EmployeeService();
 
 requestRouter.get('/requests', isAuth, async (req, res)  => {
   const employee = await employeeService.getEmployeebyJwt(req.cookies.access_token.token);
-  const holidayRequests = await holidayRequestService.getArrayRequestsByEmployeeId(employee._id);
+  var holidayRequests;
+  if (employee.role === 'admin'){
+    holidayRequests = await holidayRequestService.getAll();
+  }
+  else {
+    holidayRequests = await holidayRequestService.getArrayRequestsByEmployeeId(employee._id);
+  }
   res.status(200).render('requests', { holidayRequests, employee, access_token: req.cookies.access_token });
 });
 
